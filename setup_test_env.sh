@@ -1,3 +1,4 @@
+#!/bin/bash
 export HBNB_ENV=test
 export HBNB_MYSQL_USER=hbnb_test
 export HBNB_MYSQL_PWD=hbnb_test_pwd
