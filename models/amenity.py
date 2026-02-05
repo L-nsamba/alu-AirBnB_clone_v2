@@ -19,3 +19,4 @@ class Amenity(BaseModel, Base):
         viewonly=False,
         backref="amenities"
     )
+    

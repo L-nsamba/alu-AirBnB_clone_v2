@@ -14,11 +14,9 @@ from models.review import Review
 
 class DBStorage:
     """Database storage engine"""
-
     __engine = None
     __session = None
     
-
     def __init__(self):
         """Initialize DBStorage"""
         user = os.getenv("HBNB_MYSQL_USER")
@@ -65,7 +63,6 @@ class DBStorage:
                     objects[key] = obj
 
         return objects
-
 
     def new(self, obj):
         """Add obj to current session"""

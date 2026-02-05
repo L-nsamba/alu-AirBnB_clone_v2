@@ -14,6 +14,8 @@ from models.amenity import Amenity
 from models.review import Review
 
 warnings.filterwarnings("ignore", category=exc.SAWarning)
+
+
 class HBNBCommand(cmd.Cmd):
     """ Contains the functionality for the HBNB console"""
 
@@ -140,7 +142,6 @@ class HBNBCommand(cmd.Cmd):
         storage.save()
         print(new_instance.id)
 
-
     def help_create(self):
         """ Help information for the create method """
         print("Creates a class of any type")
@@ -240,8 +241,6 @@ class HBNBCommand(cmd.Cmd):
         else:
             for obj in all_objs.values():
                 print(obj)
-
-
 
     def help_all(self):
         """ Help information for the all command """

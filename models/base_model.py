@@ -18,22 +18,22 @@ class BaseModel:
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
     def __init__(self, *args, **kwargs):
-            if kwargs:
-                for key, value in kwargs.items():
-                    if key == "created_at" or key == "updated_at":
-                        value = datetime.fromisoformat(value)
-                    if key != "__class__":
-                        setattr(self, key, value)
-                if "id" not in kwargs:
-                    self.id = str(uuid4())
-                if "created_at" not in kwargs:
-                    self.created_at = datetime.utcnow()
-                if "updated_at" not in kwargs:
-                    self.updated_at = datetime.utcnow()
-            else:
+        if kwargs:
+            for key, value in kwargs.items():
+                if key == "created_at" or key == "updated_at":
+                    value = datetime.fromisoformat(value)
+                if key != "__class__":
+                    setattr(self, key, value)
+            if "id" not in kwargs:
                 self.id = str(uuid4())
+            if "created_at" not in kwargs:
                 self.created_at = datetime.utcnow()
+            if "updated_at" not in kwargs:
                 self.updated_at = datetime.utcnow()
+        else:
+            self.id = str(uuid4())
+            self.created_at = datetime.utcnow()
+            self.updated_at = datetime.utcnow()
 
     def __str__(self):
         """Returns a string representation of the instance"""
@@ -50,8 +50,6 @@ class BaseModel:
     def to_dict(self):
         """Return dictionary representation of instance"""
         my_dict = self.__dict__.copy()
-        
-        # Remove SQLAlchemy internal state if present
         my_dict.pop("_sa_instance_state", None)
 
         # Convert datetimes to ISO format
@@ -61,8 +59,6 @@ class BaseModel:
         my_dict['__class__'] = self.__class__.__name__
         return my_dict
 
-
     def delete(self):
-        """Delete current instance from storage"""
         from models import storage
         storage.delete(self)

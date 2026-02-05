@@ -23,7 +23,6 @@ class FileStorage:
                     result[key] = obj
         return result
 
-
     def new(self, obj):
         """Adds new object to storage dictionary"""
         key = f"{obj.__class__.__name__}.{obj.id}"
@@ -32,7 +31,8 @@ class FileStorage:
     def save(self):
         """Saves storage dictionary to file"""
         with open(FileStorage.__file_path, 'w') as f:
-            temp = {key: val.to_dict() for key, val in FileStorage.__objects.items()}
+            temp = {key: val.to_dict() 
+            for key, val in FileStorage.__objects.items()}
             json.dump(temp, f)
 
     def delete(self, obj=None):
@@ -72,3 +72,4 @@ class FileStorage:
                         FileStorage.__objects[key] = classes[cls_name](**val)
         except FileNotFoundError:
             pass
+        
