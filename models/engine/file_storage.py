@@ -9,17 +9,19 @@ class FileStorage:
     __objects = {}
 
     def all(self, cls=None):
-        """Returns a dictionary of models currently in storage
-        If cls is provided, returns only objects of that class
+        """Returns a dictionary of models currently in storage.
+        If cls is provided, returns only objects of that class.
+        cls can be a class object or a string name of the class.
         """
         if cls is None:
             return FileStorage.__objects
 
-        filtered = {}
-        for key, obj in FileStorage.__objects.items():
-            if obj.__class__ == cls:
-                filtered[key] = obj
-        return filtered
+        if isinstance(cls, str):
+            return {k: v for k, v in FileStorage.__objects.items()
+                    if v.__class__.__name__ == cls}
+        else:
+            return {k: v for k, v in FileStorage.__objects.items()
+                    if isinstance(v, cls)}
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
@@ -29,16 +31,13 @@ class FileStorage:
     def save(self):
         """Saves storage dictionary to file"""
         with open(FileStorage.__file_path, 'w') as f:
-            temp = {}
-            for key, val in FileStorage.__objects.items():
-                temp[key] = val.to_dict()
+            temp = {key: val.to_dict() for key, val in FileStorage.__objects.items()}
             json.dump(temp, f)
 
     def delete(self, obj=None):
         """Deletes obj from storage if it exists"""
         if obj is None:
             return
-
         key = f"{obj.__class__.__name__}.{obj.id}"
         if key in FileStorage.__objects:
             del FileStorage.__objects[key]
@@ -67,6 +66,8 @@ class FileStorage:
             with open(FileStorage.__file_path, 'r') as f:
                 temp = json.load(f)
                 for key, val in temp.items():
-                    self.all()[key] = classes[val['__class__']](**val)
+                    cls_name = val['__class__']
+                    if cls_name in classes:
+                        FileStorage.__objects[key] = classes[cls_name](**val)
         except FileNotFoundError:
             pass
