@@ -35,19 +35,31 @@ class DBStorage:
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
-        """Query objects from the database"""
+        """Query on the current database session"""
         objects = {}
-        classes = [User, State, City, Amenity, Place, Review]
 
-        # Make sure session fetches latest from DB
-        self.__session.expire_all()
+        # Map class names to actual classes
+        classes = {
+            'User': User,
+            'State': State,
+            'City': City,
+            'Amenity': Amenity,
+            'Place': Place,
+            'Review': Review
+        }
 
         if cls:
+            # Allow passing cls as string or class
+            if isinstance(cls, str):
+                cls = classes.get(cls)
+            if cls is None:
+                return objects
+
             for obj in self.__session.query(cls).all():
                 key = f"{obj.__class__.__name__}.{obj.id}"
                 objects[key] = obj
         else:
-            for cl in classes:
+            for cl in classes.values():
                 for obj in self.__session.query(cl).all():
                     key = f"{obj.__class__.__name__}.{obj.id}"
                     objects[key] = obj
