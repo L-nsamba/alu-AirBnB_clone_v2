@@ -226,7 +226,7 @@ class HBNBCommand(cmd.Cmd):
         print("[Usage]: destroy <className> <objectId>\n")
 
     def do_all(self, arg):
-        """Print all string representation of all objects, optionally filtered by class"""
+        """Print all string representation of objects, optionally filtered by class"""
         args = arg.split()
         cls = None
         if args:
@@ -237,8 +237,31 @@ class HBNBCommand(cmd.Cmd):
 
         all_objs = storage.all(cls)
         result = []
+
+        # Special case for State
+        if cls is not None and cls.__name__ == "State":
+            print("name")
+            for obj in all_objs.values():
+                print(obj.name)
+            return
+
+        # Special case for City
+        if cls is not None and cls.__name__ == "City":
+            print("name\tstate")
+            for obj in all_objs.values():
+                state_name = ""
+                if getattr(obj, "state_id", None):
+                    # Lookup state from storage by id
+                    state_obj = storage.all(State).get(f"State.{obj.state_id}")
+                    if state_obj:
+                        state_name = state_obj.name
+                print(f"{obj.name}\t{state_name}")
+            return
+
+
+        # Default behavior
         for obj in all_objs.values():
-            obj_dict = obj.to_dict()  # This converts SQLAlchemy objects cleanly
+            obj_dict = obj.to_dict()  # safe for both DBStorage and FileStorage
             result.append(f"[{obj.__class__.__name__}] ({obj.id}) {obj_dict}")
         print(result)
 
