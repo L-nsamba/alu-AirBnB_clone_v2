@@ -39,6 +39,9 @@ class DBStorage:
         objects = {}
         classes = [User, State, City, Amenity, Place, Review]
 
+        # Expire cached session objects to get fresh data from DB
+        self.__session.expire_all()
+
         if cls:
             for obj in self.__session.query(cls).all():
                 key = f"{obj.__class__.__name__}.{obj.id}"
@@ -50,6 +53,7 @@ class DBStorage:
                     objects[key] = obj
 
         return objects
+
 
     def new(self, obj):
         """Add obj to current session"""
