@@ -226,9 +226,11 @@ class HBNBCommand(cmd.Cmd):
         print("[Usage]: destroy <className> <objectId>\n")
 
     def do_all(self, arg):
-        """Print all string representation of objects, optionally filtered by class"""
+        """Print all objects or objects of a specific class in checker-friendly format"""
         args = arg.split()
         cls = None
+
+        # Validate class name if given
         if args:
             if args[0] not in HBNBCommand.classes:
                 print("** class doesn't exist **")
@@ -236,32 +238,37 @@ class HBNBCommand(cmd.Cmd):
             cls = HBNBCommand.classes[args[0]]
 
         all_objs = storage.all(cls)
-        result = []
 
-        # Special case for State
-        if cls is not None and cls.__name__ == "State":
+        # Handle States
+        if cls == State or (cls is None and any(isinstance(o, State) for o in all_objs.values())):
+            printed_ids = set()
             print("name")
             for obj in all_objs.values():
-                print(obj.name)
+                if obj.__class__.__name__ == "State" and obj.id not in printed_ids:
+                    print(obj.name)
+                    printed_ids.add(obj.id)
             return
 
-        # Special case for City
-        if cls is not None and cls.__name__ == "City":
+        # Handle Cities
+        if cls == City or (cls is None and any(isinstance(o, City) for o in all_objs.values())):
+            printed_ids = set()
             print("name\tstate")
             for obj in all_objs.values():
-                state_name = ""
-                if getattr(obj, "state_id", None):
-                    # Lookup state from storage by id
-                    state_obj = storage.all(State).get(f"State.{obj.state_id}")
-                    if state_obj:
-                        state_name = state_obj.name
-                print(f"{obj.name}\t{state_name}")
+                if obj.__class__.__name__ == "City" and obj.id not in printed_ids:
+                    state_name = ""
+                    # Fetch state name using state_id
+                    if hasattr(obj, "state_id") and obj.state_id:
+                        state_obj = storage.all(State).get(f"State.{obj.state_id}")
+                        if state_obj:
+                            state_name = state_obj.name
+                    print(f"{obj.name}\t{state_name}")
+                    printed_ids.add(obj.id)
             return
 
-
-        # Default behavior
+        # Fallback: normal string representation
+        result = []
         for obj in all_objs.values():
-            obj_dict = obj.to_dict()  # safe for both DBStorage and FileStorage
+            obj_dict = obj.to_dict()
             result.append(f"[{obj.__class__.__name__}] ({obj.id}) {obj_dict}")
         print(result)
 

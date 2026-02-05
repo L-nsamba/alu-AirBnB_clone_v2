@@ -1,10 +1,9 @@
 #!/usr/bin/python3
-"""Initialize models package"""
 import os
 
-storage_type = os.getenv("HBNB_TYPE_STORAGE")
+storage = None
 
-if storage_type == "db":
+if os.getenv("HBNB_TYPE_STORAGE") == "db":
     from models.engine.db_storage import DBStorage
     storage = DBStorage()
 else:
