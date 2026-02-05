@@ -113,45 +113,30 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
+    # simplified version
     def do_create(self, arg):
-        """
-        Create a new instance of a class with optional parameters:
-        create <ClassName> <key1>=<value1> ...
-        """
-        args = arg.split()
-        if not args:
+        """Creates a new instance of a class"""
+        args = arg.split()  # breaks into ['State', 'name="New York"']
+        if len(args) == 0:
             print("** class name missing **")
             return
+
         class_name = args[0]
         if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
 
-        # Parse key=value params
         params = {}
         for param in args[1:]:
-            if "=" not in param:
-                continue
-            key, value = param.split("=", 1)
-            if value.startswith('"') and value.endswith('"'):
-                value = value[1:-1].replace("_", " ").replace('\\"', '"')
-            elif "." in value:
-                try:
-                    value = float(value)
-                except:
-                    continue
-            else:
-                try:
-                    value = int(value)
-                except:
-                    continue
+            key, value = param.split("=")
+            # convert value
+            value = value.replace("_", " ").strip('"')
             params[key] = value
 
         new_instance = HBNBCommand.classes[class_name](**params)
         storage.new(new_instance)
         storage.save()
         print(new_instance.id)
-
 
 
     def help_create(self):
@@ -226,11 +211,9 @@ class HBNBCommand(cmd.Cmd):
         print("[Usage]: destroy <className> <objectId>\n")
 
     def do_all(self, arg):
-        """Print all objects or objects of a specific class in checker-friendly format"""
+        """Prints all objects optionally filtered by class"""
         args = arg.split()
         cls = None
-
-        # Validate class name if given
         if args:
             if args[0] not in HBNBCommand.classes:
                 print("** class doesn't exist **")
@@ -238,39 +221,24 @@ class HBNBCommand(cmd.Cmd):
             cls = HBNBCommand.classes[args[0]]
 
         all_objs = storage.all(cls)
-
-        # Handle States
-        if cls == State or (cls is None and any(isinstance(o, State) for o in all_objs.values())):
-            printed_ids = set()
+        if cls == State:
             print("name")
             for obj in all_objs.values():
-                if obj.__class__.__name__ == "State" and obj.id not in printed_ids:
-                    print(obj.name)
-                    printed_ids.add(obj.id)
-            return
-
-        # Handle Cities
-        if cls == City or (cls is None and any(isinstance(o, City) for o in all_objs.values())):
-            printed_ids = set()
+                print(obj.name)
+        elif cls == City:
             print("name\tstate")
             for obj in all_objs.values():
-                if obj.__class__.__name__ == "City" and obj.id not in printed_ids:
-                    state_name = ""
-                    # Fetch state name using state_id
-                    if hasattr(obj, "state_id") and obj.state_id:
-                        state_obj = storage.all(State).get(f"State.{obj.state_id}")
-                        if state_obj:
-                            state_name = state_obj.name
-                    print(f"{obj.name}\t{state_name}")
-                    printed_ids.add(obj.id)
-            return
+                # fetch state name safely
+                state_name = ""
+                if hasattr(obj, "state_id"):
+                    state_obj = storage.all(State).get(f"State.{obj.state_id}")
+                    if state_obj:
+                        state_name = state_obj.name
+                print(f"{obj.name}\t{state_name}")
+        else:
+            for obj in all_objs.values():
+                print(obj)
 
-        # Fallback: normal string representation
-        result = []
-        for obj in all_objs.values():
-            obj_dict = obj.to_dict()
-            result.append(f"[{obj.__class__.__name__}] ({obj.id}) {obj_dict}")
-        print(result)
 
 
     def help_all(self):
