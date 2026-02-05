@@ -39,7 +39,7 @@ class DBStorage:
         objects = {}
         classes = [User, State, City, Amenity, Place, Review]
 
-        # Expire cached session objects to get fresh data from DB
+        # Make sure session fetches latest from DB
         self.__session.expire_all()
 
         if cls:

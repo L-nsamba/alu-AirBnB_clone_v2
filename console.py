@@ -113,49 +113,45 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
-        """Create a new instance with optional parameters"""
+    def do_create(self, arg):
+        """
+        Create a new instance of a class with optional parameters:
+        create <ClassName> <key1>=<value1> ...
+        """
+        args = arg.split()
         if not args:
             print("** class name missing **")
             return
-
-        args_list = args.split()
-        class_name = args_list[0]
-
+        class_name = args[0]
         if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
 
+        # Parse key=value params
         params = {}
-        for param in args_list[1:]:
+        for param in args[1:]:
             if "=" not in param:
                 continue
             key, value = param.split("=", 1)
-            # Strings
             if value.startswith('"') and value.endswith('"'):
                 value = value[1:-1].replace("_", " ").replace('\\"', '"')
-            # Integers
-            elif value.isdigit():
-                value = int(value)
-            # Floats
-            else:
+            elif "." in value:
                 try:
                     value = float(value)
-                except ValueError:
+                except:
+                    continue
+            else:
+                try:
+                    value = int(value)
+                except:
                     continue
             params[key] = value
 
-        # ALWAYS create instance without overwriting ID/timestamps
-        new_instance = HBNBCommand.classes[class_name]()
-        
-        # Set attributes from params AFTER init
-        for key, value in params.items():
-            setattr(new_instance, key, value)
-
-        # Add to storage
+        new_instance = HBNBCommand.classes[class_name](**params)
         storage.new(new_instance)
         storage.save()
         print(new_instance.id)
+
 
 
     def help_create(self):
@@ -229,23 +225,23 @@ class HBNBCommand(cmd.Cmd):
         print("Destroys an individual instance of a class")
         print("[Usage]: destroy <className> <objectId>\n")
 
-    def do_all(self, args):
-        """ Shows all objects, or all objects of a class"""
-        print_list = []
-
+    def do_all(self, arg):
+        """Print all string representation of all objects, optionally filtered by class"""
+        args = arg.split()
+        cls = None
         if args:
-            args = args.split(' ')[0]  # remove possible trailing args
-            if args not in HBNBCommand.classes:
+            if args[0] not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
-                if k.split('.')[0] == args:
-                    print_list.append(str(v))
-        else:
-            for k, v in storage._FileStorage__objects.items():
-                print_list.append(str(v))
+            cls = HBNBCommand.classes[args[0]]
 
-        print(print_list)
+        all_objs = storage.all(cls)
+        result = []
+        for obj in all_objs.values():
+            obj_dict = obj.to_dict()  # This converts SQLAlchemy objects cleanly
+            result.append(f"[{obj.__class__.__name__}] ({obj.id}) {obj_dict}")
+        print(result)
+
 
     def help_all(self):
         """ Help information for the all command """
