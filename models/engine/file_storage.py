@@ -9,19 +9,20 @@ class FileStorage:
     __objects = {}
 
     def all(self, cls=None):
-        """Returns all objects in storage.
-        If cls is provided, returns only objects of that class.
-        cls can be a class object or a string name of the class.
-        """
+        """Returns all objects, or objects of a specific class"""
         if cls is None:
             return FileStorage.__objects
 
-        if isinstance(cls, str):
-            return [obj for obj in FileStorage.__objects.values()
-                    if obj.__class__.__name__ == cls]
-        else:
-            return [obj for obj in FileStorage.__objects.values()
-                    if isinstance(obj, cls)]
+        result = {}
+        for key, obj in FileStorage.__objects.items():
+            if isinstance(cls, str):
+                if obj.__class__.__name__ == cls:
+                    result[key] = obj
+            else:
+                if isinstance(obj, cls):
+                    result[key] = obj
+        return result
+
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
