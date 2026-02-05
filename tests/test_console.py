@@ -9,8 +9,8 @@ from console import HBNBCommand
 from models import storage
 from models.user import User
 
-class TestConsoleCreate(unittest.TestCase):
 
+class TestConsoleCreate(unittest.TestCase):
     def setUp(self):
         """Set up test environment"""
         self.console = HBNBCommand()

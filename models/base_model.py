@@ -55,7 +55,6 @@ class BaseModel:
         # Convert datetimes to ISO format
         my_dict['created_at'] = self.created_at.isoformat()
         my_dict['updated_at'] = self.updated_at.isoformat()
-        
         my_dict['__class__'] = self.__class__.__name__
         return my_dict
 

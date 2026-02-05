@@ -16,10 +16,8 @@ place_amenity = Table(
     primary_key=True, nullable=False)
 )
 
-
 class Place(BaseModel, Base):
     """A place to stay"""
-
     __tablename__ = "places"
 
     city_id = Column(String(60), ForeignKey("cities.id"), nullable=False)
@@ -58,4 +56,6 @@ class Place(BaseModel, Base):
         if isinstance(obj, Amenity):
             if obj.id not in self.amenity_ids:
                 self.amenity_ids.append(obj.id)
-                
+
+
+
