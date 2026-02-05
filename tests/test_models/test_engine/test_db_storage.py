@@ -42,30 +42,24 @@ class TestDBStorage(unittest.TestCase):
 
     def test_update_state(self):
         """Test that updating a State changes its name"""
-        # Create a new state
         HBNBCommand().onecmd('create State name="Nevada"')
         self.cursor.execute("SELECT id FROM states WHERE name='Nevada';")
         state_id = self.cursor.fetchone()[0]
 
-        # Update the state name
         HBNBCommand().onecmd(f'update State {state_id} name "SilverState"')
 
-        # Verify update
         self.cursor.execute("SELECT name FROM states WHERE id=%s;", (state_id,))
         new_name = self.cursor.fetchone()[0]
         self.assertEqual(new_name, "SilverState")
 
     def test_delete_state(self):
         """Test that deleting a State removes a row"""
-        # Create a new state
         HBNBCommand().onecmd('create State name="Texas"')
         before = self.count_rows("states")
 
-        # Get its id
         self.cursor.execute("SELECT id FROM states WHERE name='Texas';")
         state_id = self.cursor.fetchone()[0]
 
-        # Delete the state
         HBNBCommand().onecmd(f'destroy State {state_id}')
 
         after = self.count_rows("states")
@@ -73,7 +67,6 @@ class TestDBStorage(unittest.TestCase):
 
     def test_reload(self):
         """Test that reload repopulates objects from DB"""
-        # Create a new state
         HBNBCommand().onecmd('create State name="Florida"')
         self.cursor.execute("SELECT id FROM states WHERE name='Florida';")
         state_id = self.cursor.fetchone()[0]
@@ -89,7 +82,6 @@ class TestDBStorage(unittest.TestCase):
         )
         self.cursor = self.db.cursor()
 
-        # Verify state still exists
         self.cursor.execute("SELECT name FROM states WHERE id=%s;", (state_id,))
         name = self.cursor.fetchone()[0]
         self.assertEqual(name, "Florida")
