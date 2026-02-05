@@ -51,16 +51,19 @@ class BaseModel:
         storage.save()
 
     def to_dict(self):
-        """Convert instance into dict format"""
-        dictionary = dict(self.__dict__)
-        dictionary.update({
-            '__class__': (str(type(self)).split('.')[-1]).split('\'')[0]
-        })
-        dictionary['created_at'] = self.created_at.isoformat()
-        dictionary['updated_at'] = self.updated_at.isoformat()
-        # Remove SQLAlchemy state if present
-        dictionary.pop('_sa_instance_state', None)
-        return dictionary
+        """Return dictionary representation of instance"""
+        my_dict = self.__dict__.copy()
+        
+        # Remove SQLAlchemy internal state if present
+        my_dict.pop("_sa_instance_state", None)
+
+        # Convert datetimes to ISO format
+        my_dict['created_at'] = self.created_at.isoformat()
+        my_dict['updated_at'] = self.updated_at.isoformat()
+        
+        my_dict['__class__'] = self.__class__.__name__
+        return my_dict
+
 
     def delete(self):
         """Delete current instance from storage"""

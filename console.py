@@ -113,53 +113,47 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, arg):
-        """Create an object with parameters"""
-        if not arg:
+    def do_create(self, args):
+        """Create a new instance with optional parameters"""
+        if not args:
             print("** class name missing **")
             return
 
-        args = arg.split()
-        class_name = args[0]
+        args_list = args.split()
+        class_name = args_list[0]
 
         if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
 
         params = {}
-
-        for param in args[1:]:
-            if '=' not in param:
+        for param in args_list[1:]:
+            if "=" not in param:
                 continue
-
-            key, value = param.split('=', 1)
-
-            # String value
+            key, value = param.split("=", 1)
+            # Strings
             if value.startswith('"') and value.endswith('"'):
-                value = value[1:-1]              # remove quotes
-                value = value.replace('\\"', '"')
-                value = value.replace('_', ' ')
-                params[key] = value
-
-            # Float value
-            elif '.' in value:
-                try:
-                    params[key] = float(value)
-                except ValueError:
-                    continue
-
-            # Integer value
+                value = value[1:-1].replace("_", " ").replace('\\"', '"')
+            # Integers
+            elif value.isdigit():
+                value = int(value)
+            # Floats
             else:
                 try:
-                    params[key] = int(value)
+                    value = float(value)
                 except ValueError:
                     continue
+            params[key] = value
 
+        # ALWAYS create instance without overwriting ID/timestamps
         new_instance = HBNBCommand.classes[class_name]()
-
+        
+        # Set attributes from params AFTER init
         for key, value in params.items():
             setattr(new_instance, key, value)
 
+        # Add to storage
+        storage.new(new_instance)
         storage.save()
         print(new_instance.id)
 
